@@ -11,11 +11,13 @@ package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.Generics;
-
-import java.io.IOException;
-import java.util.Map;
+import edu.stanford.nlp.util.StringDedup;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 
 
 /**
@@ -37,7 +39,14 @@ class TagCount {
 
   TagCount(IntCounter<String> tagCounts) {
     for (String tag : tagCounts.keySet()) {
+      tag = StringDedup.INST.dedup(tag);
       map.put(tag, tagCounts.getIntCount(tag));
+    }
+    if(map.size() == 1) {
+      Entry<String, Integer> entries = map.entrySet().iterator().next();
+      map = Collections.singletonMap(entries.getKey(), entries.getValue());
+    } else if (map.isEmpty()) {
+      map = Collections.emptyMap();
     }
 
     getTagsCache = map.keySet().toArray(new String[map.keySet().size()]);
@@ -92,6 +101,12 @@ class TagCount {
 
 	if (tag.equals(NULL_SYMBOL)) tag = null;
 	tc.map.put(tag, count);
+      }
+      if(tc.map.size() == 1) {
+        Entry<String, Integer> entries = tc.map.entrySet().iterator().next();
+        tc.map = Collections.singletonMap(entries.getKey(), entries.getValue());
+      } else if (tc.map.isEmpty()) {
+        tc.map = Collections.emptyMap();
       }
 
       tc.getTagsCache = tc.map.keySet().toArray(new String[tc.map.keySet().size()]);

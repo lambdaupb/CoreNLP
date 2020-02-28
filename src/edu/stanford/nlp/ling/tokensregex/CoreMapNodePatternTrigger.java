@@ -18,7 +18,7 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
   TwoDimensionalCollectionValuedMap<Class, Object, SequencePattern<CoreMap>> annotationTriggers =
           new TwoDimensionalCollectionValuedMap<>();
   TwoDimensionalCollectionValuedMap<Class, String, SequencePattern<CoreMap>> lowercaseStringTriggers =
-          new TwoDimensionalCollectionValuedMap<>();
+          new TwoDimensionalCollectionValuedMap<>(CollectionFactory.arrayListFactory(1));
 
   public CoreMapNodePatternTrigger(SequencePattern<CoreMap>... patterns) {
     this(Arrays.asList(patterns));

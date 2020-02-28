@@ -5,10 +5,16 @@ package edu.stanford.nlp.ie.crf;
  */
 public class LinearCliquePotentialFunction implements CliquePotentialFunction {
 
-  private final double[][] weights;
+  //FIXME really large 150k*24
+  private final float[][] weights;
+
+  LinearCliquePotentialFunction(float[][] weights) {
+    this.weights = weights;
+  }
 
   LinearCliquePotentialFunction(double[][] weights) {
-    this.weights = weights;
+
+    this.weights = CRFClassifier.toFloats(weights);
   }
 
   @Override

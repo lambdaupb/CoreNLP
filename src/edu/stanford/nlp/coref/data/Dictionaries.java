@@ -1,5 +1,6 @@
 package edu.stanford.nlp.coref.data;
 
+import edu.stanford.nlp.util.StringDedup;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -118,6 +119,7 @@ public class Dictionaries  {
   public final Set<String> inanimateWords = Generics.newHashSet();
   public final Set<String> animateWords = Generics.newHashSet();
 
+  // FIXME: huge map 700k entries
   public final Map<List<String>, Gender> genderNumber = Generics.newHashMap();
 
   public final ArrayList<Counter<Pair<String, String>>> corefDict = new ArrayList<>(4);
@@ -423,6 +425,9 @@ public class Dictionaries  {
         }
 
         String[] words = split[0].split(" ");
+
+        StringDedup.INST.dedupInplace(words);
+        // FIXME: pool strings in list
         List<String> tokens = Arrays.asList(words);
 
         genderNumber.put(tokens, gender);

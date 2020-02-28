@@ -1,21 +1,22 @@
 package edu.stanford.nlp.ie.crf;
 
-import java.util.*;
-import java.util.function.DoubleUnaryOperator;
-
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
 import edu.stanford.nlp.optimization.LineSearcher;
-import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.function.DoubleUnaryOperator;
 
 /**
  * CRFBiasedClassifier is used to adjust the precision-recall tradeoff
@@ -90,9 +91,9 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
   private void addBiasFeature() {
     if ( ! featureIndex.contains(BIAS)) {
       featureIndex.add(BIAS);
-      double[][] newWeights = new double[weights.length+1][];
+      float[][] newWeights = new float[weights.length+1][];
       System.arraycopy (weights,0,newWeights,0,weights.length);
-      newWeights[weights.length] = new double[classIndex.size()];
+      newWeights[weights.length] = new float[classIndex.size()];
       weights = newWeights;
     }
   }
@@ -105,7 +106,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
   public void setBiasWeight(int cindex, double weight) {
     addBiasFeature();
     int fi = featureIndex.indexOf(BIAS);
-    weights[fi][cindex] = weight;
+    weights[fi][cindex] = (float) weight;
   }
 
   @Override

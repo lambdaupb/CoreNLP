@@ -30,6 +30,7 @@ public class LambdaSolve  {
    * These are the model parameters that have to be learned.
    * This field is used at runtime in all tagger and other IIS/Kristina code.
    */
+  //FIXME: big 50k entries
   public double[] lambda;
 
   /** Only allocated and used in the IIS optimization routines. */

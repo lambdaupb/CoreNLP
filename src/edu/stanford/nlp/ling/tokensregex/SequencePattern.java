@@ -1,12 +1,32 @@
 package edu.stanford.nlp.ling.tokensregex;
 
-import edu.stanford.nlp.util.*;
-
+import edu.stanford.nlp.util.ArraySet;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Factory;
+import edu.stanford.nlp.util.HasInterval;
+import edu.stanford.nlp.util.Interval;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.ValuedInterval;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Stack;
 import java.util.function.Function;
 
 /**
@@ -1272,9 +1292,13 @@ public class SequencePattern<T> implements Serializable {
      */
     protected void add(State nextState) {
       if (next == null) {
-        next = new LinkedHashSet<>();
+        next = Collections.singleton(nextState);
+      } else if (next.getClass() != LinkedHashSet.class) {
+        next = new LinkedHashSet<>(next);
+        next.add(nextState);
+      } else {
+        next.add(nextState);
       }
-      next.add(nextState);
     }
 
     public <T> Object value(int bid, SequenceMatcher.MatchedStates<T> matchedStates) {

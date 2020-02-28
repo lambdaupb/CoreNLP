@@ -1,5 +1,7 @@
 package edu.stanford.nlp.parser.nndep;
 
+import static java.util.stream.Collectors.toList;
+
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -25,16 +27,26 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.*;
-
-import static java.util.stream.Collectors.toList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * This class defines a transition-based dependency parser which makes
@@ -106,7 +118,7 @@ public class DependencyParser  {
    */
   private Map<String, Integer> wordIDs, posIDs, labelIDs;
 
-  private List<Integer> preComputed;
+  private int[] preComputed;
 
   /**
    * Given a particular parser configuration, this classifier will
@@ -140,7 +152,7 @@ public class DependencyParser  {
 
   /**
    * Get an integer ID for the given word. This ID can be used to index
-   * into the embeddings {@link Classifier#E}.
+   * into the embeddings {@link Classifier}.
    *
    * @return An ID for the given word, or an ID referring to a generic
    *         "unknown" word if the word is unknown
@@ -310,7 +322,7 @@ public class DependencyParser  {
     log.info("#Train Examples: " + ret.n);
 
     List<Integer> sortedTokens = Counters.toSortedList(tokPosCount, false);
-    preComputed = new ArrayList<>(sortedTokens.subList(0, Math.min(config.numPreComputed, sortedTokens.size())));
+    preComputed = new int[0];
 
     return ret;
   }
@@ -413,7 +425,7 @@ public class DependencyParser  {
       output.write("embeddingSize=" + E[0].length + "\n");
       output.write("hiddenSize=" + b1.length + "\n");
       output.write("numTokens=" + (W1[0].length / E[0].length) + "\n");
-      output.write("preComputed=" + preComputed.size() + "\n");
+      output.write("preComputed=" + preComputed.length + "\n");
 
       int index = 0;
 
@@ -454,9 +466,9 @@ public class DependencyParser  {
         }
 
       // Finish with pre-computation info
-      for (int i = 0; i < preComputed.size(); ++i) {
-        output.write(String.valueOf(preComputed.get(i)));
-        if ((i + 1) % 100 == 0 || i == preComputed.size() - 1)
+      for (int i = 0; i < preComputed.length; ++i) {
+        output.write(String.valueOf(preComputed[i]));
+        if ((i + 1) % 100 == 0 || i == preComputed.length - 1)
           output.write("\n");
         else
           output.write(" ");
@@ -610,14 +622,15 @@ public class DependencyParser  {
           W2[i][j] = Double.parseDouble(splits[i]);
       }
 
-      preComputed = new ArrayList<>();
-      while (preComputed.size() < nPreComputed) {
+      ArrayList<Integer> preComputedTmp = new ArrayList<>();
+      while (preComputedTmp.size() < nPreComputed) {
         s = input.readLine();
         splits = s.split(" ");
         for (String split : splits) {
-          preComputed.add(Integer.parseInt(split));
+          preComputedTmp.add(Integer.parseInt(split));
         }
       }
+      preComputed = preComputedTmp.stream().mapToInt(Integer::intValue).toArray();
 
       config.hiddenSize = hSize;
       config.embeddingSize = eSize;

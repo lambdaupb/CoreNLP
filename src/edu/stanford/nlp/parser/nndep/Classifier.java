@@ -45,14 +45,14 @@ public class Classifier  {
   // W2: numLabels x hiddenSize
 
   // Weight matrices
-  private final double[][] W1, W2, E;
+  private final double[][] W1, W2, E; //FIXME: E is 60k*50
   private final double[] b1;
 
   // Global gradSaved
   private double[][] gradSaved;
 
   // Gradient histories
-  private double[][] eg2W1, eg2W2, eg2E;
+  private double[][] eg2W1, eg2W2, eg2E; //FIXME: eg2E is 60k*50
   private double[] eg2b1;
 
   /**
@@ -62,6 +62,7 @@ public class Classifier  {
    * activations for a given feature ID, use {@link #preMap} to find
    * the proper index into this data.
    */
+  //FIXME: big 100k * 1k
   private double[][] saved;
 
   /**
@@ -116,6 +117,10 @@ public class Classifier  {
     this(config, null, E, W1, b1, W2, preComputed);
   }
 
+  public Classifier(Config config, double[][] E, double[][] W1, double[] b1, double[][] W2, int[] preComputed) {
+    this(config, null, E, W1, b1, W2, preComputed);
+  }
+
   /**
    * Instantiate a classifier with training data and randomly
    * initialized parameter matrices in order to begin training.
@@ -145,6 +150,31 @@ public class Classifier  {
     preMap = new HashMap<>();
     for (int i = 0; i < preComputed.size() && i < config.numPreComputed; ++i)
       preMap.put(preComputed.get(i), i);
+
+    isTraining = dataset != null;
+    if (isTraining)
+      jobHandler = new MulticoreWrapper<>(config.trainingThreads, new CostFunction(), false);
+    else
+      jobHandler = null;
+  }
+
+  public Classifier(Config config, Dataset dataset, double[][] E, double[][] W1, double[] b1, double[][] W2,
+                    int[] preComputed) {
+    this.config = config;
+    this.dataset = dataset;
+
+    this.E = E;
+    this.W1 = W1;
+    this.b1 = b1;
+    this.W2 = W2;
+
+    initGradientHistories();
+
+    numLabels = W2.length;
+
+    preMap = new HashMap<>();
+    for (int i = 0; i < preComputed.length && i < config.numPreComputed; ++i)
+      preMap.put(preComputed[i], i);
 
     isTraining = dataset != null;
     if (isTraining)

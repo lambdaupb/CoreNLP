@@ -27,17 +27,6 @@
 
 package edu.stanford.nlp.ie;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -53,8 +42,19 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
+import edu.stanford.nlp.util.StringDedup;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -602,6 +602,9 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       if (flags.numberEquivalenceDistSim) {
         word = WordShapeClassifier.wordShape(word, WordShapeClassifier.WORDSHAPEDIGITS);
       }
+
+      word = StringDedup.INST.dedup(word);
+      wordClass = StringDedup.INST.dedup(wordClass);
       lexicon.put(word, wordClass);
     }
     timing.done(log, "Loading distsim lexicon from " + flags.distSimLexicon);
