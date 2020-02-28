@@ -410,10 +410,10 @@ public class DependencyParser  {
 
   public void writeModelFile(String modelFile) {
     try {
-      double[][] W1 = classifier.getW1();
-      double[] b1 = classifier.getb1();
-      double[][] W2 = classifier.getW2();
-      double[][] E = classifier.getE();
+      float[][] W1 = classifier.getW1();
+      float[] b1 = classifier.getb1();
+      float[][] W2 = classifier.getW2();
+      float[][] E = classifier.getE();
 
       Writer output = IOUtils.getPrintWriter(modelFile);
 
@@ -479,9 +479,9 @@ public class DependencyParser  {
     }
   }
 
-  private static int writeEmbedding(double[] doubles, Writer output, int index, String word) throws IOException {
+  private static int writeEmbedding(float[] doubles, Writer output, int index, String word) throws IOException {
     output.write(word);
-    for (double aDouble : doubles) {
+    for (float aDouble : doubles) {
       output.write(" " + aDouble);
     }
     output.write("\n");
@@ -956,7 +956,7 @@ public class DependencyParser  {
       if (Thread.interrupted()) {  // Allow interrupting
         throw new RuntimeInterruptedException();
       }
-      double[] scores = classifier.computeScores(getFeatureArray(c));
+      float[] scores = classifier.computeScores(getFeatureArray(c));
 
       double optScore = Double.NEGATIVE_INFINITY;
       String optTrans = null;

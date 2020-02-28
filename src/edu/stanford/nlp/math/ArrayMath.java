@@ -453,6 +453,17 @@ public class ArrayMath {
     return result;
   }
 
+  public static float dotProduct(float[] a, float[] b) {
+    if (a.length != b.length) {
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
+    }
+    double result = 0;
+    for (int i = 0; i < a.length; i++) {
+      result += a[i] * b[i];
+    }
+    return (float) result;
+  }
+
 
 
   /**

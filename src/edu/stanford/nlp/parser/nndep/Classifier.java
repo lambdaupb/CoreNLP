@@ -6,7 +6,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 import edu.stanford.nlp.util.logging.Redwood;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,15 +44,15 @@ public class Classifier  {
   // W2: numLabels x hiddenSize
 
   // Weight matrices
-  private final double[][] W1, W2, E; //FIXME: E is 60k*50
-  private final double[] b1;
+  private final float[][] W1, W2, E; //FIXME: E is 60k*50
+  private final float[] b1;
 
   // Global gradSaved
   private double[][] gradSaved;
 
   // Gradient histories
-  private double[][] eg2W1, eg2W2, eg2E; //FIXME: eg2E is 60k*50
-  private double[] eg2b1;
+  private float[][] eg2W1, eg2W2, eg2E; //FIXME: eg2E is 60k*50
+  private float[] eg2b1;
 
   /**
    * Pre-computed hidden layer unit activations. Each double array
@@ -63,7 +62,7 @@ public class Classifier  {
    * the proper index into this data.
    */
   //FIXME: big 100k * 1k
-  private double[][] saved;
+  private float[][] saved;
 
   /**
    * Describes features which should be precomputed. Each entry maps a
@@ -121,6 +120,26 @@ public class Classifier  {
     this(config, null, E, W1, b1, W2, preComputed);
   }
 
+
+  static float[][] toFloats(double[][] from) {
+    float[][] to = new float[from.length][];
+    for(int i = 0; i < to.length; i++) {
+      to[i] = new float[from[i].length];
+      for(int j = 0; j<to[i].length;j++) {
+        to[i][j] = (float) from[i][j];
+      }
+    }
+    return to;
+  }
+
+  static float[] toFloats(double[] from) {
+      float[] to = new float[from.length];
+      for(int j = 0; j<to.length;j++) {
+        to[j] = (float) from[j];
+      }
+    return to;
+  }
+
   /**
    * Instantiate a classifier with training data and randomly
    * initialized parameter matrices in order to begin training.
@@ -138,10 +157,10 @@ public class Classifier  {
     this.config = config;
     this.dataset = dataset;
 
-    this.E = E;
-    this.W1 = W1;
-    this.b1 = b1;
-    this.W2 = W2;
+    this.E = toFloats(E);
+    this.W1 = toFloats(W1);
+    this.b1 = toFloats(b1);
+    this.W2 = toFloats(W2);
 
     initGradientHistories();
 
@@ -163,10 +182,10 @@ public class Classifier  {
     this.config = config;
     this.dataset = dataset;
 
-    this.E = E;
-    this.W1 = W1;
-    this.b1 = b1;
-    this.W2 = W2;
+    this.E = toFloats(E);
+    this.W1 = toFloats(W1);
+    this.b1 = toFloats(b1);
+    this.W2 = toFloats(W2);
 
     initGradientHistories();
 
@@ -634,10 +653,10 @@ public class Classifier  {
   }
 
   private void initGradientHistories() {
-    eg2E = new double[E.length][E[0].length];
-    eg2W1 = new double[W1.length][W1[0].length];
-    eg2b1 = new double[b1.length];
-    eg2W2 = new double[W2.length][W2[0].length];
+    eg2E = new float[E.length][E[0].length];
+    eg2W1 = new float[W1.length][W1[0].length];
+    eg2b1 = new float[b1.length];
+    eg2W2 = new float[W2.length][W2[0].length];
   }
 
   /**
@@ -689,7 +708,7 @@ public class Classifier  {
     // `preMap` indices to map into this denser array. But this
     // actually hurt training performance! (See experiments with
     // "smallMap.")
-    saved = new double[preMap.size()][config.hiddenSize];
+    saved = new float[preMap.size()][config.hiddenSize];
     final int numTokens = config.numTokens;
     final int embeddingSize = config.embeddingSize;
 
@@ -704,7 +723,7 @@ public class Classifier  {
   }
 
 
-  double[] computeScores(int[] feature) {
+  float[] computeScores(int[] feature) {
     return computeScores(feature, preMap);
   }
 
@@ -712,8 +731,8 @@ public class Classifier  {
    * Feed a feature vector forward through the network. Returns the
    * values of the output layer.
    */
-  private double[] computeScores(int[] feature, Map<Integer, Integer> preMap) {
-    final double[] hidden = new double[config.hiddenSize];
+  private float[] computeScores(int[] feature, Map<Integer, Integer> preMap) {
+    final float[] hidden = new float[config.hiddenSize];
     final int numTokens = config.numTokens;
     final int embeddingSize = config.embeddingSize;
 
@@ -735,15 +754,15 @@ public class Classifier  {
 
   // extracting these small methods makes things faster; hotspot likes them
 
-  private static double[] matrixMultiply(double[][] matrix, double[] vector) {
-    double[] result = new double[matrix.length];
+  private static float[] matrixMultiply(float[][] matrix, float[] vector) {
+    float[] result = new float[matrix.length];
     for (int i = 0; i < matrix.length; i++) {
       result[i] = ArrayMath.dotProduct(matrix[i], vector);
     }
     return result;
   }
 
-  private static void matrixMultiplySliceSum(double[] sum, double[][] matrix, double[] vector, int leftColumnOffset) {
+  private static void matrixMultiplySliceSum(float[] sum, float[][] matrix, float[] vector, int leftColumnOffset) {
     for (int i = 0; i < matrix.length; i++) {
       for (int j = 0; j < vector.length; j++) {
         sum[i] += matrix[i][leftColumnOffset + j] * vector[j];
@@ -751,7 +770,7 @@ public class Classifier  {
     }
   }
 
-  private static void addCubeInPlace(double[] vector, double [] bias) {
+  private static void addCubeInPlace(float[] vector, float [] bias) {
     for (int i = 0; i < vector.length; i++) {
       vector[i] += bias[i]; // add bias
       vector[i] = vector[i] * vector[i] * vector[i];  // cube nonlinearity
@@ -759,19 +778,19 @@ public class Classifier  {
   }
 
 
-  public double[][] getW1() {
+  public float[][] getW1() {
     return W1;
   }
 
-  public double[] getb1() {
+  public float[] getb1() {
     return b1;
   }
 
-  public double[][] getW2() {
+  public float[][] getW2() {
     return W2;
   }
 
-  public double[][] getE() {
+  public float[][] getE() {
     return E;
   }
 

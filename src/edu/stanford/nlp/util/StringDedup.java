@@ -43,7 +43,7 @@ public final class StringDedup {
   public static StringDedup INST = new StringDedup();
 
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     Instant start = Instant.now();
     // set up pipeline properties
     Properties props = new Properties();
@@ -55,10 +55,6 @@ public final class StringDedup {
     // build pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     System.out.println("init "+(Duration.between(start, Instant.now())));
-    try {
-      Thread.sleep(10*60*1000);
-    } catch (InterruptedException e) {
-
-    }
+    Thread.sleep(10*60*1000);
   }
 }
