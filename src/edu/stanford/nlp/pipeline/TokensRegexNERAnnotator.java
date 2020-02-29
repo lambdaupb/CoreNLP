@@ -373,7 +373,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
         // TODO: posTagPatterns...
         pattern = TokenSequencePattern.compile(env, entry.tokensRegex);
       } else {
-        List<SequencePattern.PatternExpr> nodePatterns = new ArrayList<>();
+        List<SequencePattern.PatternExpr> nodePatterns = new ArrayList<>(entry.regex.length);
         for (String p:entry.regex) {
           CoreMapNodePattern c = CoreMapNodePattern.valueOf(p, patternFlags);
           if (posTagPattern != null) {
