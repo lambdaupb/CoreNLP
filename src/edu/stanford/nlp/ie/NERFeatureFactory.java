@@ -568,6 +568,12 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   // serialized elsewhere or loaded each time
   private Map<String,String> lexicon;
 
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+    in.defaultReadObject();
+    StringDedup.INST.dedupInplace(lexicon);
+  }
+
   private void initLexicon(SeqClassifierFlags flags) {
     if (flags.distSimLexicon == null) {
       return;

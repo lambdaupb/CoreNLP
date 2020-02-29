@@ -10,6 +10,7 @@ package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringDedup;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
@@ -187,6 +188,7 @@ public class Dictionary  {
 
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
+      word = StringDedup.INST.dedup(word);
       TagCount count = TagCount.readTagCount(rf);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {
@@ -213,6 +215,7 @@ public class Dictionary  {
 
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
+      word = StringDedup.INST.dedup(word);
       TagCount count = TagCount.readTagCount(rf);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {

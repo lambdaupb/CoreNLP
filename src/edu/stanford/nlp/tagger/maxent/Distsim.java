@@ -2,10 +2,11 @@ package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringDedup;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
-
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -63,7 +64,7 @@ public class Distsim implements Serializable {
       if ( ! casedDistSim) {
         w = w.toLowerCase();
       }
-      lexicon.put(w, bits[1]);
+      lexicon.put(w, StringDedup.INST.dedup(bits[1]));
     }
 
     unk = lexicon.getOrDefault("<unk>", "null");
@@ -80,6 +81,11 @@ public class Distsim implements Serializable {
       }
       return lex;
     }
+  }
+
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    StringDedup.INST.dedupInplace(lexicon);
   }
 
   /**

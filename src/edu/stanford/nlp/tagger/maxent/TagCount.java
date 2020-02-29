@@ -97,6 +97,7 @@ class TagCount {
 
       for (int i = 0; i < numTags; i++) {
 	String tag = rf.readUTF();
+	tag = StringDedup.INST.dedup(tag);
         int count = rf.readInt();
 
 	if (tag.equals(NULL_SYMBOL)) tag = null;

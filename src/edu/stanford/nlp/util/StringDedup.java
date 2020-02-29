@@ -3,7 +3,9 @@ package edu.stanford.nlp.util;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,6 +29,19 @@ public final class StringDedup {
       arr[i] = dedup(arr[i]);
     }
     return arr;
+  }
+
+  public void dedupInplace(Map<String, String> map) {
+    HashMap<String, String> copy = new HashMap<>(map.size());
+    for(Map.Entry<String, String> e: map.entrySet()) {
+      copy.put(
+          StringDedup.INST.dedup(e.getKey()),
+          StringDedup.INST.dedup(e.getValue())
+      );
+    }
+    map.clear();
+    map.putAll(copy);
+    copy.clear();
   }
 
   public List<String> dedupInplace(List<String> arr) {
